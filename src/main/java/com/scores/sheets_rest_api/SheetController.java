@@ -2,6 +2,9 @@ package com.scores.sheets_rest_api;
 
 import com.scores.sheets_rest_api.entity.SheetEntity;
 import com.scores.sheets_rest_api.service.SheetService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,8 +26,10 @@ public class SheetController {
     }
 
     @GetMapping("/{id}")
-    public Optional<SheetEntity> findbyId(@PathVariable("id") int id) {
-        return sheetService.findById(id);
+    public ResponseEntity<SheetEntity> findById(@PathVariable("id") int id) {
+        return sheetService.findById(id)
+                .map(sheet -> ResponseEntity.ok(sheet))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/title/{title}")
@@ -43,8 +48,9 @@ public class SheetController {
     }
 
     @PostMapping
-    public SheetEntity save(@RequestBody SheetEntity sheetEntity) {
-        return sheetService.save(sheetEntity);
+    public ResponseEntity<SheetEntity> save(@RequestBody @Valid SheetEntity sheetEntity) {
+        SheetEntity createdSheet = sheetService.save(sheetEntity);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdSheet);
     }
 
     @PutMapping
@@ -52,8 +58,9 @@ public class SheetController {
         return sheetService.update(sheetEntity);
     }
 
-    @DeleteMapping
-    public void delete(@PathVariable("id") int id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable("id") int id) {
         sheetService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }
