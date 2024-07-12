@@ -1,7 +1,9 @@
 package com.scores.sheets_rest_api.entity;
 
 import jakarta.persistence.*;
-
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 @Entity
 @Table(name = "Sheetmusic")
 public class SheetEntity {
@@ -10,14 +12,24 @@ public class SheetEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column()
     private int id;
+
+    @NotBlank(message = "Title is mandatory")
     @Column(nullable = false)
     private String title;
+
+    @NotBlank(message = "Author is mandatory")
     @Column(nullable = false)
     private String author;
-    @Column(length = 1500)
+
+    @Size(max = 1500, message = "Description can be at most 1500 characters long")
     private String description;
+
+    @NotBlank(message = "Sheet URL is mandatory")
+    @Size(max = 1000, message = "Sheet URL can be at most 1000 characters long")
     @Column(nullable = false, length = 1000)
     private String sheeturl;
+
+    @Min(value = 1, message = "Difficulty must be at least 1")
     @Column(nullable = false)
     private int difficulty;
 
