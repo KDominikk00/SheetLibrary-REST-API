@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "Sheetmusic")
 public class SheetEntity {
@@ -33,6 +36,9 @@ public class SheetEntity {
     @Column(nullable = false)
     private int difficulty;
 
+    @Column(updatable = false)
+    private LocalDateTime uploadedAt;
+
     public SheetEntity() {
     }
 
@@ -43,6 +49,7 @@ public class SheetEntity {
         this.description = description;
         this.sheeturl = sheeturl;
         this.difficulty = difficulty;
+        this.uploadedAt = LocalDateTime.now();
     }
 
     public int getId() {
@@ -91,5 +98,13 @@ public class SheetEntity {
 
     public void setDifficulty(int difficulty) {
         this.difficulty = difficulty;
+    }
+
+    public LocalDateTime getUploadedAt() {
+        return uploadedAt;
+    }
+
+    public void setUploadedAt(LocalDateTime uploadedAt) {
+        this.uploadedAt = uploadedAt;
     }
 }
