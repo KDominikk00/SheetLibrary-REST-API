@@ -1,14 +1,14 @@
 FROM maven:3.9.3-eclipse-temurin-17 AS build
 
-# Install JDK 21
+# Install JDK 21 from a verified source
 RUN apt-get update && apt-get install -y wget && \
-    wget https://download.java.net/java/GA/jdk21/latest/binaries/openjdk-21_linux-x64_bin.tar.gz && \
-    tar -xzf openjdk-21_linux-x64_bin.tar.gz && \
-    mv jdk-21 /usr/local/ && \
-    update-alternatives --install /usr/bin/java java /usr/local/jdk-21/bin/java 1 && \
-    update-alternatives --install /usr/bin/javac javac /usr/local/jdk-21/bin/javac 1 && \
-    update-alternatives --set java /usr/local/jdk-21/bin/java && \
-    update-alternatives --set javac /usr/local/jdk-21/bin/javac
+    wget https://download.bell-sw.com/java/21+35/bellsoft-jdk21+35-linux-amd64.tar.gz && \
+    tar -xzf bellsoft-jdk21+35-linux-amd64.tar.gz && \
+    mv jdk-21+35 /usr/local/ && \
+    update-alternatives --install /usr/bin/java java /usr/local/jdk-21+35/bin/java 1 && \
+    update-alternatives --install /usr/bin/javac javac /usr/local/jdk-21+35/bin/javac 1 && \
+    update-alternatives --set java /usr/local/jdk-21+35/bin/java && \
+    update-alternatives --set javac /usr/local/jdk-21+35/bin/javac
 
 # Verify the installation
 RUN java -version
