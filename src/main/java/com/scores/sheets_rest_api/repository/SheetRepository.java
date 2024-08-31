@@ -8,9 +8,5 @@ import java.util.List;
 
 @Repository
 public interface SheetRepository extends JpaRepository<SheetEntity, Integer> {
-    List<SheetEntity> findByAuthor(String name);
-
-    List<SheetEntity> findByDifficulty(int difficulty);
-
-    List<SheetEntity> findByTitle(String title);
+    List<SheetEntity> findByUserId(String userId);
 }

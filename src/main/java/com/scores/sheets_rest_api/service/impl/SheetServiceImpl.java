@@ -23,23 +23,13 @@ public class SheetServiceImpl implements SheetService {
     }
 
     @Override
+    public List<SheetEntity> findAllByUserId(String userId) {
+        return sheetRepository.findByUserId(userId);
+    }
+
+    @Override
     public Optional<SheetEntity> findById(int id) {
         return sheetRepository.findById(id);
-    }
-
-    @Override
-    public List<SheetEntity> findByTitle(String title) {
-        return sheetRepository.findByTitle(title);
-    }
-
-    @Override
-    public List<SheetEntity> findByDifficulty(int difficulty) {
-        return sheetRepository.findByDifficulty(difficulty);
-    }
-
-    @Override
-    public List<SheetEntity> findByAuthor(String author) {
-        return sheetRepository.findByAuthor(author);
     }
 
     @Override
@@ -49,11 +39,21 @@ public class SheetServiceImpl implements SheetService {
 
     @Override
     public SheetEntity update(SheetEntity sheetEntity) {
-        return sheetRepository.save(sheetEntity);
+        Optional<SheetEntity> existingEntity = sheetRepository.findById(sheetEntity.getId());
+        if (existingEntity.isPresent() && existingEntity.get().getUserId().equals(sheetEntity.getUserId())) {
+            return sheetRepository.save(sheetEntity);
+        } else {
+            throw new IllegalArgumentException("Entity with ID " + sheetEntity.getId() + " does not exist or does not belong to the user.");
+        }
     }
 
     @Override
-    public void deleteById(int id) {
-        sheetRepository.deleteById(id);
+    public void deleteById(int id, String userId) {
+        Optional<SheetEntity> sheetEntity = sheetRepository.findById(id);
+        if (sheetEntity.isPresent() && sheetEntity.get().getUserId().equals(userId)) {
+            sheetRepository.deleteById(id);
+        } else {
+            throw new IllegalArgumentException("Entity with ID " + id + " does not exist or does not belong to the user.");
+        }
     }
 }

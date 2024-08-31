@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/sheet")
@@ -16,15 +15,20 @@ public class SheetController {
 
     private final SheetService sheetService;
 
-    public SheetController(SheetService employeeService) {
-        this.sheetService = employeeService;
+    public SheetController(SheetService sheetService) {
+        this.sheetService = sheetService;
     }
 
     @GetMapping
-    public List<SheetEntity> findAll() {
-        return sheetService.findAll();
+    public List<SheetEntity> findAll(@RequestHeader(value = "userId", required = false) String userId) {
+        if (userId != null) {
+            return sheetService.findAllByUserId(userId);
+        } else {
+            return sheetService.findAll();
+        }
     }
 
+    // This method retrieves a sheet by its ID
     @GetMapping("/{id}")
     public ResponseEntity<SheetEntity> findById(@PathVariable("id") int id) {
         return sheetService.findById(id)
@@ -32,35 +36,39 @@ public class SheetController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/title/{title}")
-    public List<SheetEntity> findByTitle(@PathVariable("title") String title) {
-        return sheetService.findByTitle(title);
-    }
-
-    @GetMapping("/difficulty/{difficulty}")
-    public List<SheetEntity> findByDifficulty(@PathVariable("difficulty") int difficulty) {
-        return sheetService.findByDifficulty(difficulty);
-    }
-
-    @GetMapping("/author/{author}")
-    public List<SheetEntity> findByAuthor(@PathVariable("author") String author) {
-        return sheetService.findByAuthor(author);
-    }
-
+    // This method saves a new sheet
     @PostMapping
-    public ResponseEntity<SheetEntity> save(@RequestBody @Valid SheetEntity sheetEntity) {
+    public ResponseEntity<SheetEntity> save(@RequestBody @Valid SheetEntity sheetEntity,
+                                            @RequestHeader("userId") String userId) {
+        sheetEntity.setUserId(userId); // Set the userId from the request header
         SheetEntity createdSheet = sheetService.save(sheetEntity);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdSheet);
     }
 
-    @PutMapping
-    public SheetEntity update(@RequestBody SheetEntity sheetEntity) {
-        return sheetService.update(sheetEntity);
+    // This method updates an existing sheet
+    @PutMapping("/{id}")
+    public ResponseEntity<SheetEntity> update(@PathVariable("id") int id,
+                                              @RequestBody @Valid SheetEntity sheetEntity,
+                                              @RequestHeader("userId") String userId) {
+        sheetEntity.setId(id); // Ensure the ID in the request body matches the path variable
+        sheetEntity.setUserId(userId); // Set the userId from the request header
+        try {
+            SheetEntity updatedSheet = sheetService.update(sheetEntity);
+            return ResponseEntity.ok(updatedSheet);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
     }
 
+    // This method deletes a sheet by its ID
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") int id) {
-        sheetService.deleteById(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> delete(@PathVariable("id") int id,
+                                       @RequestHeader("userId") String userId) {
+        try {
+            sheetService.deleteById(id, userId);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
     }
 }

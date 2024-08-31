@@ -10,7 +10,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -23,10 +22,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class SheetControllerTests {
 
     private static final String END_POINT_PATH = "/sheet";
+    private static final String USER_ID = "user123"; // Example user ID for tests
 
-    @Autowired private MockMvc mockMvc;
-    @Autowired private ObjectMapper objectMapper;
-    @MockBean private SheetService sheetService;
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockBean
+    private SheetService sheetService;
 
     @Test
     public void findAll_shouldReturnEmptyList() throws Exception {
@@ -51,7 +56,7 @@ public class SheetControllerTests {
     @Test
     public void findById_shouldReturnSheet() throws Exception {
         int sheetId = 1;
-        SheetEntity sheet = new SheetEntity(sheetId, "Title", "Author", "Description", "http://url.com", 1);
+        SheetEntity sheet = new SheetEntity(sheetId, "Title", "Author", "Description", "http://url.com", "http://thumburl.com", 1, USER_ID);
         when(sheetService.findById(sheetId)).thenReturn(Optional.of(sheet));
 
         mockMvc.perform(get(END_POINT_PATH + "/" + sheetId)
@@ -62,6 +67,7 @@ public class SheetControllerTests {
                 .andExpect(jsonPath("$.author").value("Author"))
                 .andExpect(jsonPath("$.description").value("Description"))
                 .andExpect(jsonPath("$.sheeturl").value("http://url.com"))
+                .andExpect(jsonPath("$.sheetthumb").value("http://thumburl.com"))
                 .andExpect(jsonPath("$.difficulty").value(1));
     }
 
@@ -72,7 +78,9 @@ public class SheetControllerTests {
         newSheet.setAuthor("");
         newSheet.setDescription("");
         newSheet.setSheeturl("");
+        newSheet.setSheetthumb("");
         newSheet.setDifficulty(0);
+        newSheet.setUserId(USER_ID); // Set user ID for creation
 
         String requestBodyJSON = objectMapper.writeValueAsString(newSheet);
 
@@ -84,8 +92,8 @@ public class SheetControllerTests {
 
     @Test
     public void save_shouldReturnCreatedSheet() throws Exception {
-        SheetEntity newSheet = new SheetEntity(0, "Title", "Author", "Description", "http://url.com", 1);
-        SheetEntity savedSheet = new SheetEntity(1, "Title", "Author", "Description", "http://url.com", 1);
+        SheetEntity newSheet = new SheetEntity(0, "Title", "Author", "Description", "http://url.com", "http://thumburl.com", 1, USER_ID);
+        SheetEntity savedSheet = new SheetEntity(1, "Title", "Author", "Description", "http://url.com", "http://thumburl.com", 1, USER_ID);
 
         when(sheetService.save(any(SheetEntity.class))).thenReturn(savedSheet);
 
@@ -100,18 +108,20 @@ public class SheetControllerTests {
                 .andExpect(jsonPath("$.author").value("Author"))
                 .andExpect(jsonPath("$.description").value("Description"))
                 .andExpect(jsonPath("$.sheeturl").value("http://url.com"))
+                .andExpect(jsonPath("$.sheetthumb").value("http://thumburl.com"))
                 .andExpect(jsonPath("$.difficulty").value(1));
     }
 
     @Test
     public void update_shouldReturnUpdatedSheet() throws Exception {
-        SheetEntity updatedSheet = new SheetEntity(1, "Updated Title", "Updated Author", "Updated Description", "http://updated-url.com", 2);
+        SheetEntity updatedSheet = new SheetEntity(1, "Updated Title", "Updated Author", "Updated Description", "http://updated-url.com", "http://updated-thumburl.com", 2, USER_ID);
 
         when(sheetService.update(any(SheetEntity.class))).thenReturn(updatedSheet);
 
         String requestBodyJSON = objectMapper.writeValueAsString(updatedSheet);
 
-        mockMvc.perform(put(END_POINT_PATH)
+        mockMvc.perform(put(END_POINT_PATH + "/" + updatedSheet.getId())
+                        .header("userId", USER_ID) // Include user ID in the request header
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBodyJSON))
                 .andExpect(status().isOk())
@@ -120,6 +130,7 @@ public class SheetControllerTests {
                 .andExpect(jsonPath("$.author").value("Updated Author"))
                 .andExpect(jsonPath("$.description").value("Updated Description"))
                 .andExpect(jsonPath("$.sheeturl").value("http://updated-url.com"))
+                .andExpect(jsonPath("$.sheetthumb").value("http://updated-thumburl.com"))
                 .andExpect(jsonPath("$.difficulty").value(2));
     }
 
@@ -128,6 +139,7 @@ public class SheetControllerTests {
         int sheetId = 1;
 
         mockMvc.perform(delete(END_POINT_PATH + "/" + sheetId)
+                        .header("userId", USER_ID) // Include user ID in the request header
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
     }
