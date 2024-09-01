@@ -1,5 +1,5 @@
 
-![SheetLibrary Spring Boot REST API]([https://imgur.com/vSMJYsK](https://imgur.com/a/Lp02Orx))
+![SheetLibrary Spring Boot REST API](https://i.imgur.com/vSMJYsK.png)
 
 This repository contains the backend for the [SheetLibrary Project](https://github.com/KDominikk00/SheetLibrary-app). This REST API is built using Spring Boot and provides endpoints for managing a library of sheet music. The application uses Spring Boot, JPA Hibernate, and OAuth for authentication.
 
